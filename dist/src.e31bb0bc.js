@@ -17176,6 +17176,10 @@ Object.defineProperty(exports, "__esModule", {
 exports.initContract = initContract;
 exports.logout = logout;
 exports.login = login;
+exports.hasClass = hasClass;
+exports.changeProcessText = changeProcessText;
+exports.convertUnixTimeToDate = convertUnixTimeToDate;
+exports.checkElement = void 0;
 
 var _nearApiJs = require("near-api-js");
 
@@ -17194,13 +17198,13 @@ function initContract() {
 }
 
 function _initContract() {
-  _initContract = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+  _initContract = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
     var near;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
-        switch (_context.prev = _context.next) {
+        switch (_context2.prev = _context2.next) {
           case 0:
-            _context.next = 2;
+            _context2.next = 2;
             return (0, _nearApiJs.connect)(Object.assign({
               deps: {
                 keyStore: new _nearApiJs.keyStores.BrowserLocalStorageKeyStore()
@@ -17208,30 +17212,30 @@ function _initContract() {
             }, nearConfig));
 
           case 2:
-            near = _context.sent;
+            near = _context2.sent;
             // Initializing Wallet based Account. It can work with NEAR testnet wallet that
             // is hosted at https://wallet.testnet.near.org
             window.walletConnection = new _nearApiJs.WalletConnection(near); // Getting the Account ID. If still unauthorized, it's just empty string
 
             window.accountId = window.walletConnection.getAccountId(); // Initializing our contract APIs by contract name and configuration
 
-            _context.next = 7;
+            _context2.next = 7;
             return new _nearApiJs.Contract(window.walletConnection.account(), nearConfig.contractName, {
               // View methods are read only. They don't modify the state, but usually return some value.
               viewMethods: ['getTask', 'getAllTasks', 'getTasksByAccountId'],
               // Change methods can modify the state. But you don't receive the returned value when called.
-              changeMethods: ['addNewTask']
+              changeMethods: ['addNewTask', 'toggleTaskDone']
             });
 
           case 7:
-            window.contract = _context.sent;
+            window.contract = _context2.sent;
 
           case 8:
           case "end":
-            return _context.stop();
+            return _context2.stop();
         }
       }
-    }, _callee);
+    }, _callee2);
   }));
   return _initContract.apply(this, arguments);
 }
@@ -17248,6 +17252,69 @@ function login() {
   // This works by creating a new access key for the user's account and storing
   // the private key in localStorage.
   window.walletConnection.requestSignIn(nearConfig.contractName);
+} //check if element exist
+
+
+var checkElement = /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(selector) {
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            if (!(document.querySelector(selector) === null)) {
+              _context.next = 5;
+              break;
+            }
+
+            _context.next = 3;
+            return new Promise(function (resolve) {
+              return requestAnimationFrame(resolve);
+            });
+
+          case 3:
+            _context.next = 0;
+            break;
+
+          case 5:
+            return _context.abrupt("return", document.querySelector(selector));
+
+          case 6:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+
+  return function checkElement(_x) {
+    return _ref.apply(this, arguments);
+  };
+}(); //check if class is exist
+
+
+exports.checkElement = checkElement;
+
+function hasClass(elem, className) {
+  return elem.className.split(' ').indexOf(className) > -1;
+} //Change process status text
+
+
+function changeProcessText(status) {
+  document.getElementById("txtProcessStatus").innerText = status;
+} //Convert Unix timestamp to Time
+
+
+function convertUnixTimeToDate(_timestamp) {
+  var a = new Date(_timestamp);
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var year = a.getFullYear();
+  var month = months[a.getMonth()];
+  var date = a.getDate();
+  var hour = a.getHours();
+  var min = a.getMinutes();
+  var sec = a.getSeconds();
+  var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
+  return time;
 }
 },{"near-api-js":"../node_modules/near-api-js/lib/browser-index.js","./config":"config.js"}],"index.js":[function(require,module,exports) {
 "use strict";
@@ -17268,12 +17335,12 @@ var _getConfig = (0, _config.default)("development" || 'development'),
     networkId = _getConfig.networkId; // global variable used throughout
 
 
-var currentGreeting;
+var currentTasks;
 var submitButton = document.querySelector('form button');
 
 document.querySelector('form').onsubmit = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(event) {
-    var _event$target$element, fieldset, author, content, tasks, tblTask;
+    var _event$target$element, fieldset, author, content;
 
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -17285,60 +17352,47 @@ document.querySelector('form').onsubmit = /*#__PURE__*/function () {
 
             fieldset.disabled = true;
             _context.prev = 3;
-            _context.next = 6;
+            (0, _utils.changeProcessText)("Processing...Please wait...."); // make an update call to the smart contract
+
+            _context.next = 7;
             return window.contract.addNewTask({
               // pass the value that the user entered in the greeting field
-              author: author.value,
-              content: content.value
+              _author: author.value,
+              _content: content.value
             });
 
-          case 6:
-            _context.next = 12;
+          case 7:
+            _context.next = 13;
             break;
 
-          case 8:
-            _context.prev = 8;
+          case 9:
+            _context.prev = 9;
             _context.t0 = _context["catch"](3);
             alert('Something went wrong! ' + 'Maybe you need to sign out and back in? ' + 'Check your browser console for more info.');
             throw _context.t0;
 
-          case 12:
-            _context.prev = 12;
+          case 13:
+            _context.prev = 13;
             // re-enable the form, whether the call succeeded or failed
-            fieldset.disabled = false;
-            tasks = [];
-            tblTask = document.querySelector('#tblTasks').innerHTML;
-            _context.next = 18;
-            return contract.getTasksByAccountId({
-              _accountId: window.accountId
-            });
+            fieldset.disabled = false; // update the greeting in the UI
+
+            _context.next = 17;
+            return fetchTasks();
+
+          case 17:
+            return _context.finish(13);
 
           case 18:
-            tasks = _context.sent;
-            console.log(tasks);
-            tasks.forEach(function (task) {
-              var id = task.id;
-              var author = task.author;
-              var content = task.content;
-              var accountId = task.accountId;
-              var timestamp = task.timestamp;
-              var isDone;
-              document.querySelector('#tblTasks').innerHTML += '<tr><td>' + id + '</td><td>' + timestamp + '</td><td>' + author + '</td><td>' + content + '</td><td>' + isDone + '</td></tr>';
-            }); //document.querySelector('#tblTasks').innerHTML += '<tr><td>Thang</td><td>Doe</td><td>john@example.com</td><td></td><td></td></tr>';
+            (0, _utils.changeProcessText)("Process completed!"); // disable the save button, since it now matches the persisted value
 
-            return _context.finish(12);
+            submitButton.disabled = true;
 
-          case 22:
-            // disable the save button, since it now matches the persisted value
-            submitButton.disabled = true; // update the greeting in the UI
-            //await fetchGreeting()
-
-          case 23:
+          case 20:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 8, 12, 22]]);
+    }, _callee, null, [[3, 9, 13, 18]]);
   }));
 
   return function (_x) {
@@ -17352,8 +17406,60 @@ document.querySelector('input#content').oninput = function (event) {
   } else {
     submitButton.disabled = true;
   }
-};
+}; // checkElement('input.isDone').then((selector) => {
+//   document.querySelector('input.isDone').onclick = () => {
+//     alert('click');
+//   }
+// });
 
+
+document.addEventListener('click', /*#__PURE__*/function () {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(e) {
+    var parent, tskId, markTaskResult;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            if (!(0, _utils.hasClass)(e.target, 'isDone')) {
+              _context2.next = 11;
+              break;
+            }
+
+            (0, _utils.changeProcessText)("Processing...Please wait....");
+            parent = e.target.parentElement.parentElement;
+            tskId = parent.firstChild.innerText;
+            tskId = parseInt(tskId);
+            _context2.next = 7;
+            return contract.toggleTaskDone({
+              _taskId: tskId
+            });
+
+          case 7:
+            markTaskResult = _context2.sent;
+
+            if (markTaskResult) {
+              parent.style.textDecorationLine = "line-through";
+              alert("Marked the task as finished");
+            } else {
+              parent.style.textDecorationLine = "none";
+              alert("Marked the task as unfinished");
+            }
+
+            (0, _utils.changeProcessText)("Process completed!");
+            console.log(tskId);
+
+          case 11:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+
+  return function (_x2) {
+    return _ref2.apply(this, arguments);
+  };
+}(), false);
 document.querySelector('#sign-in-button').onclick = _utils.login;
 document.querySelector('#sign-out-button').onclick = _utils.logout; // Display the signed-out-flow container
 
@@ -17376,19 +17482,57 @@ function signedInFlow() {
   contractLink.innerText = '@' + window.contract.contractId; // update with selected networkId
 
   accountLink.href = accountLink.href.replace('testnet', networkId);
-  contractLink.href = contractLink.href.replace('testnet', networkId); //fetchGreeting()
+  contractLink.href = contractLink.href.replace('testnet', networkId);
+  fetchTasks();
 } // update global currentGreeting variable; update DOM with it
-// async function fetchGreeting() {
-//   currentGreeting = await contract.getGreeting({ accountId: window.accountId })
-//   document.querySelectorAll('[data-behavior=greeting]').forEach(el => {
-//     // set divs, spans, etc
-//     el.innerText = currentGreeting
-//     // set input elements
-//     el.value = currentGreeting
-//   })
-// }
-// `nearInitPromise` gets called on page load
 
+
+function fetchTasks() {
+  return _fetchTasks.apply(this, arguments);
+} // `nearInitPromise` gets called on page load
+
+
+function _fetchTasks() {
+  _fetchTasks = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            //learn previous todo list
+            document.querySelector('#tblTasks').innerHTML = '';
+            _context3.next = 3;
+            return contract.getTasksByAccountId({
+              _accountId: window.accountId
+            });
+
+          case 3:
+            currentTasks = _context3.sent;
+            console.log(currentTasks);
+            currentTasks.forEach(function (task) {
+              var id = task.id;
+              var author = task.author;
+              var content = task.content;
+              var accountId = task.accountId;
+              var timestamp = task.timestamp;
+              timestamp = timestamp / 1000000;
+              var isDone = task.isDone;
+
+              if (isDone) {
+                document.querySelector('#tblTasks').innerHTML += '<tr><td class="tskID">' + id + '</td><td>' + (0, _utils.convertUnixTimeToDate)(timestamp) + '</td><td>' + author + '</td><td>' + content + '</td><td><input type="checkbox" class="isDone" name="isDone" checked></td></tr>';
+              } else {
+                document.querySelector('#tblTasks').innerHTML += '<tr><td class="tskID">' + id + '</td><td>' + (0, _utils.convertUnixTimeToDate)(timestamp) + '</td><td>' + author + '</td><td>' + content + '</td><td><input type="checkbox" class="isDone" name="isDone"></td></tr>';
+              }
+            });
+
+          case 6:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3);
+  }));
+  return _fetchTasks.apply(this, arguments);
+}
 
 window.nearInitPromise = (0, _utils.initContract)().then(function () {
   if (window.walletConnection.isSignedIn()) signedInFlow();else signedOutFlow();
@@ -17421,7 +17565,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55457" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64420" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

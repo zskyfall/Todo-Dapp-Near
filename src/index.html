@@ -39,12 +39,7 @@
     </button>
     <main>
       <h1>
-        {% comment %} <label
-          for="greeting"
-          data-behavior="greeting"
-          style="color: var(--secondary); border-bottom: 2px solid var(--secondary);"
-        >
-        </label> {% endcomment %}
+        Hi,
         <span data-behavior="account-id"></span>!
       </h1>
       <form>
@@ -85,8 +80,11 @@
         </fieldset>
       </form>
       
-      <h1>TASKS</h1>
-      <table class="table table-dark table-striped">
+      <div>
+        <h1>TASKS</h1>
+      </div>
+      <p id="txtProcessStatus"></p>
+      <table class="table table-dark table-striped" >
         <thead>
           <tr>
             <th>ID</th>

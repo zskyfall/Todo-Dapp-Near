@@ -22,5 +22,5 @@ export class Task {
     }
 }
 
-// An array that stores messages on the blockchain
+// An array that stores tasks on the blockchain
 export const tasks = new PersistentVector<Task>("tks");

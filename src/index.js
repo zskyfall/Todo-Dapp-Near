@@ -1,12 +1,12 @@
 import 'regenerator-runtime/runtime'
 
-import { initContract, login, logout } from './utils'
+import { initContract, login, logout, checkElement, convertUnixTimeToDate, hasClass, changeProcessText } from './utils'
 
 import getConfig from './config'
 const { networkId } = getConfig(process.env.NODE_ENV || 'development')
 
 // global variable used throughout
-let currentGreeting
+let currentTasks
 
 const submitButton = document.querySelector('form button')
 
@@ -20,11 +20,12 @@ document.querySelector('form').onsubmit = async (event) => {
   fieldset.disabled = true
 
   try {
+    changeProcessText("Processing...Please wait....");
     // make an update call to the smart contract
     await window.contract.addNewTask({
       // pass the value that the user entered in the greeting field
-      author: author.value,
-      content: content.value
+      _author: author.value,
+      _content: content.value
     })
   } catch (e) {
     alert(
@@ -36,32 +37,15 @@ document.querySelector('form').onsubmit = async (event) => {
   } finally {
     // re-enable the form, whether the call succeeded or failed
     fieldset.disabled = false
-    let tasks = [];
-    let tblTask = document.querySelector('#tblTasks').innerHTML;
-    tasks = await contract.getTasksByAccountId({ _accountId: window.accountId })
-    console.log(tasks); 
-
-    tasks.forEach((task)=> {
-      let id = task.id;
-      let author = task.author;
-      let content = task.content;
-      let accountId = task.accountId;
-      let timestamp = task.timestamp;
-      let isDone
-
-      document.querySelector('#tblTasks').innerHTML += '<tr><td>' + id + '</td><td>' + timestamp +'</td><td>' + author + '</td><td>'+ content +'</td><td>' + isDone + '</td></tr>';
-
-    });
-
-    //document.querySelector('#tblTasks').innerHTML += '<tr><td>Thang</td><td>Doe</td><td>john@example.com</td><td></td><td></td></tr>';
+    
+    // update the greeting in the UI
+    await fetchTasks()
   }
+  
+  changeProcessText("Process completed!");
 
   // disable the save button, since it now matches the persisted value
   submitButton.disabled = true
-
-  // update the greeting in the UI
-  //await fetchGreeting()
-
 }
 
 document.querySelector('input#content').oninput = (event) => {
@@ -73,8 +57,41 @@ document.querySelector('input#content').oninput = (event) => {
   }
 }
 
+// checkElement('input.isDone').then((selector) => {
+//   document.querySelector('input.isDone').onclick = () => {
+//     alert('click');
+//   }
+// });
+
+document.addEventListener('click', async function (e) {
+  if (hasClass(e.target, 'isDone')) {
+      
+      changeProcessText("Processing...Please wait....");
+
+      let parent = e.target.parentElement.parentElement;
+      let tskId = parent.firstChild.innerText;
+          tskId = parseInt(tskId);
+
+      let markTaskResult = await contract.toggleTaskDone({_taskId: tskId});
+
+      if(markTaskResult) {
+        parent.style.textDecorationLine = "line-through";
+        alert("Marked the task as finished");
+      }
+      else {
+        parent.style.textDecorationLine = "none";
+        alert("Marked the task as unfinished");
+      }
+
+      changeProcessText("Process completed!");
+
+      console.log(tskId);
+  }
+}, false);
+
 document.querySelector('#sign-in-button').onclick = login
 document.querySelector('#sign-out-button').onclick = logout
+
 
 // Display the signed-out-flow container
 function signedOutFlow() {
@@ -101,20 +118,36 @@ function signedInFlow() {
   accountLink.href = accountLink.href.replace('testnet', networkId)
   contractLink.href = contractLink.href.replace('testnet', networkId)
 
-  //fetchGreeting()
+  fetchTasks()
 }
 
 // update global currentGreeting variable; update DOM with it
-// async function fetchGreeting() {
-//   currentGreeting = await contract.getGreeting({ accountId: window.accountId })
-//   document.querySelectorAll('[data-behavior=greeting]').forEach(el => {
-//     // set divs, spans, etc
-//     el.innerText = currentGreeting
+async function fetchTasks() {
 
-//     // set input elements
-//     el.value = currentGreeting
-//   })
-// }
+  //learn previous todo list
+  document.querySelector('#tblTasks').innerHTML = '';
+  currentTasks = await contract.getTasksByAccountId({ _accountId: window.accountId })
+
+  console.log(currentTasks);
+
+  currentTasks.forEach((task)=> {
+    let id = task.id;
+    let author = task.author;
+    let content = task.content;
+    let accountId = task.accountId;
+    let timestamp = task.timestamp;
+        timestamp = timestamp / 1000000;
+    let isDone = task.isDone;
+
+    if(isDone) {
+      document.querySelector('#tblTasks').innerHTML += '<tr><td class="tskID">' + id + '</td><td>' + convertUnixTimeToDate(timestamp) +'</td><td>' + author + '</td><td>'+ content +'</td><td><input type="checkbox" class="isDone" name="isDone" checked></td></tr>'
+    }
+    else {
+      document.querySelector('#tblTasks').innerHTML += '<tr><td class="tskID">' + id + '</td><td>' + convertUnixTimeToDate(timestamp) +'</td><td>' + author + '</td><td>'+ content +'</td><td><input type="checkbox" class="isDone" name="isDone"></td></tr>'
+    }
+    
+  });
+}
 
 // `nearInitPromise` gets called on page load
 window.nearInitPromise = initContract()
