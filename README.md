@@ -1,8 +1,8 @@
-nearApp
+Near-Todo-DApp
 ==================
 
-This app was initialized with [create-near-app]
-
+The small tool to create Todo List on Near protocol.
+<br />Demo: https://
 
 Quick Start
 ===========
@@ -10,9 +10,12 @@ Quick Start
 To run this project locally:
 
 1. Prerequisites: Make sure you've installed [Node.js] ≥ 12
-2. Install dependencies: `yarn install`
-3. Run the local development server: `yarn dev` (see `package.json` for a
-   full list of `scripts` you can run with `yarn`)
+2. Install dependencies:
+   <br />`npm install --global near-sdk-as`
+   <br />`npm install --global near-cli`
+   <br />`npm install`
+3. Run the local development server: `npm run dev` (see `package.json` for a
+   full list of `scripts` you can run with `npm`)
 
 Now you'll have a local development environment backed by the NEAR TestNet!
 
@@ -29,22 +32,22 @@ Exploring The Code
    can learn how the frontend connects to the NEAR blockchain.
 3. Tests: there are different kinds of tests for the frontend and the smart
    contract. See `contract/README` for info about how it's tested. The frontend
-   code gets tested with [jest]. You can run both of these at once with `yarn
+   code gets tested with [jest]. You can run both of these at once with `npm
    run test`.
 
 
 Deploy
 ======
 
-Every smart contract in NEAR has its [own associated account][NEAR accounts]. When you run `yarn dev`, your smart contract gets deployed to the live NEAR TestNet with a throwaway account. When you're ready to make it permanent, here's how.
+Every smart contract in NEAR has its [own associated account][NEAR accounts]. When you run `npm run dev`, your smart contract gets deployed to the live NEAR TestNet with a throwaway account. When you're ready to make it permanent, here's how.
 
 
 Step 0: Install near-cli (optional)
 -------------------------------------
 
-[near-cli] is a command line interface (CLI) for interacting with the NEAR blockchain. It was installed to the local `node_modules` folder when you ran `yarn install`, but for best ergonomics you may want to install it globally:
+[near-cli] is a command line interface (CLI) for interacting with the NEAR blockchain. It was installed to the local `node_modules` folder when you ran `npm install`, but for best ergonomics you may want to install it globally:
 
-    yarn install --global near-cli
+    npm install --global near-cli
 
 Or, if you'd rather use the locally-installed version, you can prefix all `near` commands with `npx`
 
@@ -54,7 +57,7 @@ Ensure that it's installed with `near --version` (or `npx near --version`)
 Step 1: Create an account for the contract
 ------------------------------------------
 
-Each account on NEAR can have at most one contract deployed to it. If you've already created an account such as `your-name.testnet`, you can deploy your contract to `nearApp.your-name.testnet`. Assuming you've already created an account on [NEAR Wallet], here's how to create `nearApp.your-name.testnet`:
+Each account on NEAR can have at most one contract deployed to it. If you've already created an account such as `your-name.testnet`, you can deploy your contract to `todo.your-name.testnet`. Assuming you've already created an account on [NEAR Wallet], here's how to create `todo.your-name.testnet`:
 
 1. Authorize NEAR CLI, following the commands it gives you:
 
@@ -62,7 +65,7 @@ Each account on NEAR can have at most one contract deployed to it. If you've alr
 
 2. Create a subaccount (replace `YOUR-NAME` below with your actual account name):
 
-      near create-account nearApp.YOUR-NAME.testnet --masterAccount YOUR-NAME.testnet
+      near create-account todo.YOUR-NAME.testnet --masterAccount YOUR-NAME.testnet
 
 
 Step 2: set contract name in code
@@ -70,7 +73,7 @@ Step 2: set contract name in code
 
 Modify the line in `src/config.js` that sets the account name of the contract. Set it to the account id you used above.
 
-    const CONTRACT_NAME = process.env.CONTRACT_NAME || 'nearApp.YOUR-NAME.testnet'
+    const CONTRACT_NAME = process.env.CONTRACT_NAME || 'todo.YOUR-NAME.testnet'
 
 
 Step 3: deploy!
@@ -78,7 +81,7 @@ Step 3: deploy!
 
 One command:
 
-    yarn deploy
+    npm run deploy
 
 As you can see in `package.json`, this does two things:
 
@@ -99,4 +102,3 @@ On Windows, if you're seeing an error containing `EPERM` it may be related to sp
   [NEAR Wallet]: https://wallet.testnet.near.org/
   [near-cli]: https://github.com/near/near-cli
   [gh-pages]: https://github.com/tschaub/gh-pages
-"# Todo-Dapp-Near" 
