@@ -2,7 +2,7 @@ Near-Todo-DApp
 ==================
 
 The small tool to create Todo List on Near protocol.
-<br />Demo: http://zozo.fun:1234/
+<br />Demo: http://huuthang.tech:1234/
 
 Quick Start
 ===========
